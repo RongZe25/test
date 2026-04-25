@@ -287,21 +287,21 @@
     }
 
     async function init() {
-      await waitGlobalInitialized('Mvu');
-
-      populateCharacterData();
-
-      eventOn(Mvu.events.VARIABLE_UPDATE_ENDED, () => {
-        populateCharacterData();
-      });
-
-      /* 展开/折叠 */
+      /* 展开/折叠 —— 纯UI交互，不依赖Mvu，必须先绑定 */
       $('.fzt-header').off('click').on('click', function () {
         const body = $('.fzt-body');
         const isHidden = body.is(':hidden');
 
         body.slideToggle(200);
         $('.fzt-toggle-hint').text(isHidden ? '[ 点击收起 ]' : '[ 点击展开 ]');
+      });
+
+      await waitGlobalInitialized('Mvu');
+
+      populateCharacterData();
+
+      eventOn(Mvu.events.VARIABLE_UPDATE_ENDED, () => {
+        populateCharacterData();
       });
     }
 
