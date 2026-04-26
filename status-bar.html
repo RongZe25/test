@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    .fzt-panel {
+      font-family: "Microsoft YaHei", "SimSun", serif;
+      font-size: 0.88em;
+      color: #c8b88a;
+      padding: 10px 14px 8px 14px;
+      margin: 0;
+      background: linear-gradient(135deg, #1a1410 0%, #2a2018 50%, #1a1410 100%);
+      border-top: 1px solid #3d3224;
+      border-bottom: 1px solid #3d3224;
+    }
+
+    .fzt-title {
+      font-size: 1.05em;
+      font-weight: bold;
+      color: #e8d5a3;
+      letter-spacing: 2px;
+      text-shadow: 0 0 6px rgba(232, 213, 163, 0.3);
+      padding-bottom: 6px;
+      border-bottom: 1px dashed #4a3c28;
+      margin-bottom: 8px;
+    }
+
+    .fzt-fortune-bar {
+      background: rgba(80, 60, 30, 0.25);
+      border: 1px solid #4a3c28;
+      border-radius: 3px;
+      padding: 5px 10px;
+      margin-bottom: 8px;
+      text-align: center;
+      font-size: 0.95em;
+      color: #d4b96a;
+      letter-spacing: 1px;
+    }
+
+    .fzt-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px 16px;
+    }
+
+    .fzt-item {
+      display: flex;
+      align-items: baseline;
+      padding: 2px 0;
+      line-height: 1.6;
+    }
+
+    .fzt-label {
+      color: #8a7a5e;
+      white-space: nowrap;
+      margin-right: 4px;
+      flex-shrink: 0;
+    }
+
+    .fzt-label::before {
+      content: '▸';
+      margin-right: 3px;
+      color: #6a5a3e;
+      font-size: 0.8em;
+    }
+
+    .fzt-value {
+      color: #c8b88a;
+      word-break: break-all;
+    }
+
+    .fzt-divider {
+      border: none;
+      border-top: 1px dashed #3d3224;
+      margin: 6px 0;
+    }
+
+    .fzt-section-title {
+      font-size: 0.8em;
+      color: #6a5a3e;
+      letter-spacing: 1px;
+      margin-bottom: 2px;
+    }
+
+    .fzt-item-full {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: baseline;
+      padding: 2px 0;
+      line-height: 1.6;
+    }
+
+    .fzt-item-full .fzt-label {
+      color: #8a7a5e;
+      white-space: nowrap;
+      margin-right: 4px;
+      flex-shrink: 0;
+    }
+
+    .fzt-item-full .fzt-label::before {
+      content: '▸';
+      margin-right: 3px;
+      color: #6a5a3e;
+      font-size: 0.8em;
+    }
+
+    .fzt-item-full .fzt-value {
+      color: #c8b88a;
+    }
+
+    .fzt-inventory-list {
+      grid-column: 1 / -1;
+      padding: 3px 0 2px 14px;
+      color: #a89870;
+      font-size: 0.92em;
+      line-height: 1.7;
+    }
+
+    .fzt-inv-item {
+      display: inline-block;
+      background: rgba(80, 60, 30, 0.2);
+      border: 1px solid #3d3224;
+      border-radius: 2px;
+      padding: 1px 6px;
+      margin: 2px 3px 2px 0;
+    }
+
+    .fzt-progress-bar {
+      grid-column: 1 / -1;
+      margin: 4px 0;
+    }
+
+    .fzt-progress-track {
+      background: #2a2018;
+      border: 1px solid #3d3224;
+      border-radius: 2px;
+      height: 14px;
+      overflow: hidden;
+    }
+
+    .fzt-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #8b4513, #cd853f);
+      border-radius: 2px;
+    }
+
+    .fzt-progress-text {
+      font-size: 0.75em;
+      color: #7a6b52;
+      text-align: right;
+      margin-top: 1px;
+    }
+
+    .fzt-person-tag {
+      display: inline-block;
+      background: rgba(80, 60, 30, 0.3);
+      border: 1px solid #4a3c28;
+      border-radius: 2px;
+      padding: 1px 6px;
+      margin: 1px 2px;
+      font-size: 0.9em;
+      color: #c8b88a;
+    }
+
+    .fzt-mainline-off {
+      color: #6a5a3e;
+    }
+
+    .fzt-mainline-on {
+      color: #cd853f;
+      text-shadow: 0 0 4px rgba(205, 133, 63, 0.5);
+      font-weight: bold;
+    }
+  </style>
+
+  <script type="module">
+    function populateCharacterData() {
+      const all_variables = getAllVariables();
+
+      const fortune = _.get(all_variables, 'stat_data.世界状态.今日黄历', '【未卜】等待新客上门');
+      const time = _.get(all_variables, 'stat_data.世界状态.当前时间', '未知');
+      const location = _.get(all_variables, 'stat_data.世界状态.当前地点', '未知');
+      const dice = _.get(all_variables, 'stat_data.世界状态.暗骰点数', 0);
+
+      const people = _.get(all_variables, 'stat_data.世界状态.在场人物', {});
+      const peopleNames = Object.keys(people).filter(name => people[name]);
+
+      const days = _.get(all_variables, 'stat_data.福泽堂.经营时间', 0);
+      const orders = _.get(all_variables, 'stat_data.福泽堂.完成单数', 0);
+
+      const inventory = _.get(all_variables, 'stat_data.福泽堂.库房', {});
+      const invKeys = Object.keys(inventory);
+
+      const yuanmeiProgress = _.get(all_variables, 'stat_data.袁枚.七宝收集进度', 0);
+      const mainlineOn = _.get(all_variables, 'stat_data.主线.是否开启', false);
+
+      $('.val-fortune').text(fortune);
+      $('.val-time').text(time);
+      $('.val-location').text(location);
+      $('.val-dice').text(dice > 0 ? 'D100 → ' + dice : '今日未投');
+      $('.val-days').text(days);
+      $('.val-orders').text(orders);
+
+      const peopleHtml = peopleNames.length > 0
+        ? peopleNames.map(n => '<span class="fzt-person-tag">' + _.escape(n) + '</span>').join('')
+        : '<span style="color:#6a5a3e">空无一人</span>';
+      $('.val-people').html(peopleHtml);
+
+      if (invKeys.length > 0) {
+        const invHtml = invKeys.map(name => {
+          const desc = _.get(inventory, [name, '描述'], '');
+          return '<span class="fzt-inv-item" title="' + _.escape(desc) + '">' + _.escape(name) + '</span>';
+        }).join('');
+        $('.val-inventory').html(invHtml);
+      } else {
+        $('.val-inventory').html('<span style="color:#6a5a3e">空空如也，连根老鼠毛都没有</span>');
+      }
+
+      const progressPct = Math.min(Math.round((yuanmeiProgress / 6) * 100), 100);
+      $('.fzt-progress-fill').css('width', progressPct + '%');
+      $('.fzt-progress-text').text('袁枚·七宝收集 ' + yuanmeiProgress + ' / 6');
+
+      if (mainlineOn) {
+        $('.val-mainline').html('<span class="fzt-mainline-on">⚡ 七宝白玉轮·终局已至</span>');
+      } else {
+        $('.val-mainline').html('<span class="fzt-mainline-off">尚未触发</span>');
+      }
+    }
+
+    async function init() {
+      await waitGlobalInitialized('Mvu');
+
+      populateCharacterData();
+
+      eventOn(Mvu.events.VARIABLE_UPDATE_ENDED, () => {
+        populateCharacterData();
+      });
+    }
+
+    $(errorCatched(init));
+  </script>
+</head>
+<body>
+  <div class="fzt-panel">
+    <div class="fzt-title">📜 福泽堂 · 内部档案</div>
+
+    <div class="fzt-fortune-bar">
+      <span class="val-fortune">【未卜】等待新客上门</span>
+    </div>
+
+    <div class="fzt-section-title">〔 天时地利 〕</div>
+    <div class="fzt-grid">
+      <div class="fzt-item">
+        <span class="fzt-label">时辰</span>
+        <span class="fzt-value val-time">未知</span>
+      </div>
+      <div class="fzt-item">
+        <span class="fzt-label">所在</span>
+        <span class="fzt-value val-location">未知</span>
+      </div>
+      <div class="fzt-item">
+        <span class="fzt-label">暗骰</span>
+        <span class="fzt-value val-dice">今日未投</span>
+      </div>
+      <div class="fzt-item">
+        <span class="fzt-label">苟活</span>
+        <span class="fzt-value">第 <span class="val-days">0</span> 天</span>
+      </div>
+      <div class="fzt-item-full">
+        <span class="fzt-label">在场</span>
+        <span class="fzt-value val-people"><span style="color:#6a5a3e">空无一人</span></span>
+      </div>
+    </div>
+
+    <hr class="fzt-divider">
+
+    <div class="fzt-section-title">〔 福泽堂经营 〕</div>
+    <div class="fzt-grid">
+      <div class="fzt-item">
+        <span class="fzt-label">完成单数</span>
+        <span class="fzt-value val-orders">0</span>
+      </div>
+      <div class="fzt-item">
+        <span class="fzt-label">主线</span>
+        <span class="fzt-value val-mainline"><span class="fzt-mainline-off">尚未触发</span></span>
+      </div>
+      <div class="fzt-progress-bar">
+        <div class="fzt-progress-track">
+          <div class="fzt-progress-fill" style="width: 0%"></div>
+        </div>
+        <div class="fzt-progress-text">袁枚·七宝收集 0 / 6</div>
+      </div>
+    </div>
+
+    <hr class="fzt-divider">
+
+    <div class="fzt-section-title">〔 库房家当 〕</div>
+    <div class="fzt-inventory-list val-inventory"><span style="color:#6a5a3e">空空如也，连根老鼠毛都没有</span></div>
+  </div>
+</body>
+</html>
